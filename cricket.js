@@ -8,6 +8,7 @@ const rolesChannel = '843530990721695745';
 const prefix = '!';
 
 const welcome = require('./welcome');
+const checkstreaming = require('./checkstreaming');
 
 const bot = new discord.Client({partials: ["MESSAGE", "CHANNEL", "REACTION"]});
 bot.commands = new discord.Collection();
@@ -39,9 +40,9 @@ bot.on('message', (message) => {
 bot.on('ready', () => {
   bot.channels.cache.get(logChannel).send('Cricket is online!');
   bot.channels.cache.get(logChannel).send("Registering Reaction Listeners...").then(sent => {
-    bot.commands.get('reactionroles').execute(sent, ["registerer"], discord, bot);
+  bot.commands.get('reactionroles').execute(sent, ["registerer"], discord, bot);
   });  
   welcome(bot);
+  checkstreaming(bot);
 });
-
 bot.login(process.env.BOT_LOGIN);
