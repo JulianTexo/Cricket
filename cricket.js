@@ -1,9 +1,16 @@
 const discord = require('discord.js');
+const schedule = require('node-schedule');
 require('dotenv').config();
+
+const rule = new schedule.RecurrenceRule();
+rule.hour = 9;
+rule.minute = 0;
 
 const logChannel = '843564412324413501';
 const commandsChannel = '843564389466374165';
 const rolesChannel = '843530990721695745';
+let newMembers = 0;
+let messages = 0;
 
 const prefix = '!';
 
@@ -21,7 +28,12 @@ for(const file of commandFiles){
   bot.commands.set(command.name, command);
 }
 
+bot.on('guildMemberAdd', function(member){
+  newMembers++;
+});
+
 bot.on('message', (message) => {
+  messages++;
   if(!message.content.startsWith(prefix) || message.author.bot) return;
 
   const args = message.content.slice(prefix.length).split(/ +/);
@@ -29,6 +41,10 @@ bot.on('message', (message) => {
 
   if(command == 'ping'){
     bot.commands.get('ping').execute(message, args);
+  }
+
+  if(command == 'membercount'){
+    bot.commands.get('memberCount').execute(message, bot);
   }
 
   if(command == 'reactionrole'){
@@ -41,7 +57,12 @@ bot.on('ready', () => {
   bot.channels.cache.get(logChannel).send('Cricket is online!');
   bot.channels.cache.get(logChannel).send("Registering Reaction Listeners...").then(sent => {
   bot.commands.get('reactionroles').execute(sent, ["registerer"], discord, bot);
-  });  
+  }); 
+  schedule.scheduleJob(rule, function(){
+    bot.channels.cache.get(logChannel).send(`In the last 24h ${newMembers} new member(s) joined the server! \n ${messages} messages have been send in that period.\n`);
+    newMembers.clear;
+    messages = 0;
+  });
   welcome(bot);
   checkstreaming(bot);
 });
